@@ -1,1 +1,1 @@
-# examples-repository-with-apache-flink
+# my-openshift-local-party
