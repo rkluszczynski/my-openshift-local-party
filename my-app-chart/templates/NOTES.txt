@@ -1,0 +1,4 @@
+1. Get Pods names: oc get pods
+2. Execute with proper Pod name:
+    oc port-forward my-app-spring-boot-deployment-5d65b8ffbc-c28lq 9000:8080
+3. Visit: http://localhost:9000/actuator
