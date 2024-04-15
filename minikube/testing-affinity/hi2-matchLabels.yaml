@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hi2
+  labels:
+    app: hi2
+spec:
+  replicas: 30
+  selector:
+    matchLabels:
+      app: hi2
+  template:
+    metadata:
+      labels:
+        app: hi2
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: hi2
+                topologyKey: node-role.kubernetes.io
+              weight: 100
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: hi2
+                topologyKey: node.kubernetes.io/tst-wkr
+              weight: 5
+      containers:
+        - name: hi-from
+          image: pbitty/hello-from:latest
+          ports:
+            - name: http
+              containerPort: 80
+      terminationGracePeriodSeconds: 1
+  serviceName: hi2
