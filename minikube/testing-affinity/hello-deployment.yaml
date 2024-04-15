@@ -23,9 +23,9 @@ spec:
                 matchExpressions: [ { key: app, operator: In, values: [ hello ] } ]
               topologyKey: "kubernetes.io/hostname"
       containers:
-        - name: hello-from
-          image: pbitty/hello-from:latest
+        - name: app
+          image: kicbase/echo-server:latest
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
       terminationGracePeriodSeconds: 1

@@ -1,39 +1,35 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: hi2
+  name: hi3
   labels:
-    app: hi2
+    app: hi3
 spec:
   replicas: 30
   selector:
     matchLabels:
-      app: hi2
+      app: hi3
   template:
     metadata:
       labels:
-        app: hi2
+        app: hi3
     spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            # different weights -> test results (node1->rack1, node[2-4]->rack2):
-            # - 100/5 -> 15/5/5/5
-            # - 20/5 -> 14/5/6/5
-            # - 10/5 -> 13/6/6/5
-            # - 5/5 -> 12/6/6/6
             - podAffinityTerm:
                 labelSelector:
                   matchLabels:
-                    app: hi2
-                topologyKey: node-role.kubernetes.io
-              weight: 100
-            - podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app: hi2
+                    app: hi3
                 topologyKey: node.kubernetes.io/tst-wkr
               weight: 5
+      topologySpreadConstraints:
+        - labelSelector:
+            matchLabels:
+              app: hi3
+          maxSkew: 1
+          topologyKey: node-role.kubernetes.io
+          whenUnsatisfiable: DoNotSchedule
       containers:
         - name: app
           image: kicbase/echo-server:latest
@@ -41,4 +37,4 @@ spec:
             - name: http
               containerPort: 8080
       terminationGracePeriodSeconds: 1
-  serviceName: hi2
+  serviceName: hi3

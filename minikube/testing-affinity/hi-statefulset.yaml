@@ -5,7 +5,7 @@ metadata:
   labels:
     app: hi
 spec:
-  replicas: 30
+  replicas: 1
   selector:
     matchLabels:
       app: hi
@@ -22,20 +22,20 @@ spec:
 #          nodeAffinityPolicy: Honor
 #          nodeTaintsPolicy: Honor
           topologyKey: node-role.kubernetes.io
-          whenUnsatisfiable: DoNotSchedule
-        - labelSelector:
-            matchLabels:
-              app: hi
-          maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
+          whenUnsatisfiable: ScheduleAnyway #DoNotSchedule
+#        - labelSelector:
+#            matchLabels:
+#              app: hi
+#          maxSkew: 1
+#          topologyKey: kubernetes.io/hostname
+#          whenUnsatisfiable: DoNotSchedule
 #          matchLabelKeys:
 #            - pod-template-hash
       containers:
-        - name: hi-from
-          image: pbitty/hello-from:latest
+        - name: app
+          image: kicbase/echo-server:latest
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
       terminationGracePeriodSeconds: 1
   serviceName: hi
