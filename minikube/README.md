@@ -21,11 +21,19 @@ Additionally:
 
 * ```minikube dashboard``` - open k8s minikube dashboard;
 * ```minikube start --nodes 3``` - start k8s with 3 nodes;
-* ```minikube service web-service --url``` - shows URL defined for cluster;
-* ```minikube kubectl -- get pods -A``` - downloads appropriate `kubectl` version;
+* ```minikube kubectl -- get pods -A``` - downloads appropriate `kubectl` version and list pods;
 * ```alias kubectl="minikube kubectl --"``` - alias for the above;
 
-## rack & node affinity testing
+## testing: replicas ha & exposed url
+
+```shell
+kubectl apply -f hello-deployment.yaml
+kubectl apply -f hello-svc.yaml
+```
+
+Next, please execute ``minikube service hello --url`` and go to printed URL using browser.
+
+## testing: rack & node anti-affinity
 
 * https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
 * https://docs.openshift.com/container-platform/4.14/nodes/scheduling/nodes-scheduler-pod-affinity.html#nodes-scheduler-pod-affinity-example-antiaffinity_nodes-scheduler-pod-affinity
