@@ -17,13 +17,11 @@ spec:
       containers:
         - name: application-container
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-
-
           livenessProbe:
             httpGet:
               path: /alive

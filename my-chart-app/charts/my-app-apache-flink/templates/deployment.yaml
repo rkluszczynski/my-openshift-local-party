@@ -15,11 +15,30 @@ spec:
         {{- include "{{ .Chart.Name }}.selectorLabels" . | nindent 8 }}
     spec:
       containers:
+        #
         - name: {{ .Chart.Name }}-jobmanager
           command: [ '/docker-entrypoint.sh', 'jobmanager' ]
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
-            - name: http
-              containerPort: 8081
+            - containerPort: 6123
+              name: tcp-rpc
+              protocol: TCP
+            - containerPort: 6124
+              name: tcp-blob
+              protocol: TCP
+            - containerPort: 6125
+              name: tcp-query
+              protocol: TCP
+            - containerPort: 8081
+              name: http-ui
+              protocol: TCP
+        #
+        - name: {{ .Chart.Name }}-taskmanager
+          command: [ '/docker-entrypoint.sh', 'taskmanager' ]
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6125
+              name: tcp-query
               protocol: TCP
