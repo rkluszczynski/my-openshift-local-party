@@ -1,4 +1,5 @@
-FROM apache/flink:1.18.1-scala_2.12-java17
+#FROM apache/flink:1.18.1-java17
+FROM apache/flink:1.16.1-java11
 
 ARG jarFileName
 

@@ -2,55 +2,81 @@ package io.rkluszczynski.openshift.local.myappflink;
 
 import io.rkluszczynski.openshift.local.myappflink.domain.WordsCapitalizer;
 import java.util.Properties;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
-import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
-import org.apache.flink.connector.kafka.sink.KafkaSink;
-import org.apache.flink.connector.kafka.source.KafkaSource;
-import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.GlobalConfiguration;
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 public class MyDataStreamJob {
 
     public static void main(String[] args) throws Exception {
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        final var bootstrapServers = "my-kafka-ephemeral-single-kafka-bootstrap";
+        StreamExecutionEnvironment env = configureExecutionEnvironment();
+        var bootstrapServers = "my-kafka-ephemeral-single-kafka-bootstrap:9093";
 
-        final var source = createStringConsumer("my-input-topic", bootstrapServers, "my-group");
-        final var stream = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        stream
+        var consumer = createStringConsumer("my-input-topic", bootstrapServers, "my-group");
+        env.addSource(consumer)
+              .returns(String.class)
               .map(new WordsCapitalizer())
-              .sinkTo(
+              .addSink(
                     createStringProducer("my-output-topic", bootstrapServers)
               );
-
         env.execute("Flink Java UpperCase Example");
     }
 
-    private static KafkaSource<String> createStringConsumer(String topic, String bootstrapServers, String kafkaGroup) {
-        final var properties = new Properties();
+    private static FlinkKafkaConsumer<String> createStringConsumer(String topic, String bootstrapServers, String groupId) {
+        var properties = new Properties();
+        properties.setProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return KafkaSource.<String>builder()
-              .setBootstrapServers(bootstrapServers)
-              .setTopics(topic)
-              .setGroupId(kafkaGroup)
-              .setStartingOffsets(OffsetsInitializer.earliest())
-              .setValueOnlyDeserializer(new SimpleStringSchema())
-              .setProperties(properties)
-              .build();
+        return new FlinkKafkaConsumer<>(
+              topic,
+              new SimpleStringSchema(),
+              properties
+        );
+
+//        return KafkaSource.<String>builder()
+//              .setBootstrapServers(bootstrapServers)
+//              .setTopics(topic)
+//              .setGroupId(groupId)
+////              .setStartingOffsets(OffsetsInitializer.earliest())
+//              .setValueOnlyDeserializer(new SimpleStringSchema())
+//              .setProperties(properties)
+//              .build();
     }
 
-    private static KafkaSink<String> createStringProducer(String topic, String bootstrapServers) {
-        final var properties = new Properties();
+    private static FlinkKafkaProducer<String> createStringProducer(String topic, String bootstrapServers) {
+        var properties = new Properties();
+        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
-        final var serializer = KafkaRecordSerializationSchema.<String>builder()
-              .setValueSerializationSchema(new SimpleStringSchema())
-              .setTopic(topic)
-              .build();
-        return KafkaSink.<String>builder()
-              .setBootstrapServers(bootstrapServers)
-              .setRecordSerializer(serializer)
-              .setKafkaProducerConfig(properties)
-              .build();
+        return new FlinkKafkaProducer<>(
+              topic,
+              new SimpleStringSchema(),
+              properties);
+
+//        final var serializer = KafkaRecordSerializationSchema.<String>builder()
+//              .setValueSerializationSchema(new SimpleStringSchema())
+//              .setTopic(topic)
+//              .build();
+//        return KafkaSink.<String>builder()
+//              .setBootstrapServers(bootstrapServers)
+//              .setRecordSerializer(serializer)
+//              .setKafkaProducerConfig(properties)
+//              .build();
+    }
+
+    private static StreamExecutionEnvironment configureExecutionEnvironment() {
+        StreamExecutionEnvironment executionEnvironment = StreamExecutionEnvironment.getExecutionEnvironment();
+        if (executionEnvironment instanceof LocalStreamEnvironment) {
+            Configuration configuration = new Configuration(); //GlobalConfiguration.loadConfiguration("config");
+            return StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(configuration);
+        } else {
+            return executionEnvironment;
+        }
     }
 }

@@ -6,22 +6,17 @@ plugins {
 }
 
 ext {
-    javaVersion = '17'
-    flinkVersion = '1.18.1' //'1.19.0'
+    javaVersion = '11' //'17'
+    flinkVersion = '1.16.1' //'1.19.0'
     scalaBinaryVersion = '2.12'
     slf4jVersion = '1.7.36'
     log4jVersion = '2.17.1'
-    flinkVersionNew = flinkVersion.toString().replace("-SNAPSHOT", "") >= ""
 }
 
 // artifact properties
-group = 'io.rkluszczynski.openshift.local.myappflink'
+group = 'io.rkluszczynski.openshift.local'
 version = '0.1.0-SNAPSHOT'
-if (flinkVersionNew) {
-    mainClassName = 'io.rkluszczynski.openshift.local.myappflink.MyDataStreamJob'
-} else {
-    mainClassName = 'io.rkluszczynski.openshift.local.myappflink.StreamingJob'
-}
+mainClassName = 'io.rkluszczynski.openshift.local.myappflink.MyDataStreamJob'
 description = """Flink Quickstart Job"""
 
 sourceCompatibility = javaVersion
@@ -63,29 +58,27 @@ dependencies {
     // Compile-time dependencies that should NOT be part of the
     // shadow jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
-    if (flinkVersionNew) {
-        implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
-        implementation "org.apache.flink:flink-clients:${flinkVersion}"
-        implementation "org.apache.flink:flink-core:${flinkVersion}"
-        implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-streaming-java:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-clients:${flinkVersion}"
+    flinkShadowJar "org.apache.flink:flink-core:${flinkVersion}"
 
-        // https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka
-        implementation "org.apache.flink:flink-connector-kafka:3.1.0-1.18"
-    } else {
-        implementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
-        implementation "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
-        implementation "org.apache.flink:flink-core_${scalaBinaryVersion}:${flinkVersion}"
-        implementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
-
-        // https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka
-        implementation "org.apache.flink:flink-connector-kafka:3.1.0-1.18"
-    }
+//    implementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}"
+//    implementation "org.apache.flink:flink-clients_${scalaBinaryVersion}:${flinkVersion}"
+//    implementation "org.apache.flink:flink-core_${scalaBinaryVersion}:${flinkVersion}"
 
     // --------------------------------------------------------------
     // Dependencies that should be part of the shadow jar, e.g.
     // connectors. These must be in the flinkShadowJar configuration!
     // --------------------------------------------------------------
     //flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+
+    // https://mvnrepository.com/artifact/org.apache.flink/flink-connector-base
+    flinkShadowJar "org.apache.flink:flink-connector-base:${flinkVersion}"
+
+    // https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka
+//    flinkShadowJar "org.apache.flink:flink-connector-kafka:1.17.2"
+    flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkVersion}"
+//    flinkShadowJar "org.apache.flink:flink-connector-kafka:3.1.0-1.18"
 
     runtimeOnly "org.apache.logging.log4j:log4j-slf4j-impl:${log4jVersion}"
     runtimeOnly "org.apache.logging.log4j:log4j-api:${log4jVersion}"
