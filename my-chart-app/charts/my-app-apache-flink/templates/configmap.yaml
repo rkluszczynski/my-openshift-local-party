@@ -3,9 +3,9 @@ kind: ConfigMap
 metadata:
   name: {{ .Chart.Name }}-configmap
 data:
-  index.html: |
-    <html lang="uk">
-    <h1>Welcome</h1>
-    </br>
-    <h1>Hi! I got deployed in {{ .Values.env.name }} Environment using Helm Chart </h1>
-    </html>
+  properties-flink-jobmanager: |
+    {{ include "{{ .Chart.Name }}.commonFlinkConfiguration" . }}
+    jobmanager.memory.process.size: 2G
+  properties-flink-taskmanager: |
+    {{ include "{{ .Chart.Name }}.commonFlinkConfiguration" . }}
+    taskmanager.memory.process.size: 2G

@@ -17,9 +17,20 @@ spec:
       containers:
         #
         - name: {{ .Chart.Name }}-jobmanager
-          command: [ '/docker-entrypoint.sh', 'jobmanager' ]
+          args: [ 'jobmanager' ]
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: Always
+          env:
+            - name: FLINK_PROPERTIES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-configmap
+                  key: properties-flink-jobmanager
+          livenessProbe:
+            tcpSocket:
+              port: 6123
+            initialDelaySeconds: 180
+            periodSeconds: 120
           ports:
             - containerPort: 6123
               name: tcp-rpc
@@ -27,18 +38,40 @@ spec:
             - containerPort: 6124
               name: tcp-blob
               protocol: TCP
-            - containerPort: 6125
-              name: tcp-query
-              protocol: TCP
             - containerPort: 8081
               name: http-ui
               protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
+            requests:
+              cpu: 300m
+              memory: 1500Mi
         #
         - name: {{ .Chart.Name }}-taskmanager
-          command: [ '/docker-entrypoint.sh', 'taskmanager' ]
+          args: [ 'taskmanager' ]
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: Always
+          env:
+            - name: FLINK_PROPERTIES
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}-configmap
+                  key: properties-flink-taskmanager
+          livenessProbe:
+            tcpSocket:
+              port: 6122
+            initialDelaySeconds: 180
+            periodSeconds: 120
           ports:
-            - containerPort: 6125
-              name: tcp-query
+            - containerPort: 6122
+              name: tcp-rpc
               protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
+            requests:
+              cpu: 400m
+              memory: 1500Mi
