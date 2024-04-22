@@ -1,14 +1,9 @@
-replicaCount: 2
+replicaCount: 0
 
 image:
   repository: image-registry.openshift-image-registry.svc:5000/my-app-test/myappsbs
   tag: "latest"
   pullPolicy: IfNotPresent
-
-service:
-  type: ClusterIP
-  port: 8080
-  targetPort: 9000
 
 env:
   name: dev

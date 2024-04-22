@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "{{ .Chart.Name }}.selectorLabels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "{{ .Chart.Name }}.selectorLabels" . | nindent 6 }}
@@ -29,7 +29,8 @@ spec:
           livenessProbe:
             tcpSocket:
               port: 6123
-            initialDelaySeconds: 180
+            initialDelaySeconds: 300
+            failureThreshold: 10
             periodSeconds: 120
           ports:
             - containerPort: 6123
@@ -62,7 +63,8 @@ spec:
           livenessProbe:
             tcpSocket:
               port: 6122
-            initialDelaySeconds: 180
+            initialDelaySeconds: 300
+            failureThreshold: 10
             periodSeconds: 120
           ports:
             - containerPort: 6122
