@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AppLivenessEndpoint extends AbstractProbeEndpoint {
 
     private AppLivenessEndpoint() {
-        super("[ liveness ]");
+        super("liveness");
     }
 
     @GetMapping

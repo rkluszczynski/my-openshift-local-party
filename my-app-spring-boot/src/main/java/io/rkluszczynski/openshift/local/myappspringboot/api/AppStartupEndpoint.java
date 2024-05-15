@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AppStartupEndpoint extends AbstractProbeEndpoint {
 
     private AppStartupEndpoint() {
-        super("[ startup ]");
+        super("startup");
     }
 
     @GetMapping
